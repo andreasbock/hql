@@ -1,0 +1,1 @@
+sudo wpa_supplicant -Dwext -B -ieth0 -c scripts/networks.conf

@@ -51,21 +51,31 @@ class Instrument b => Bond b where
   coupons      :: b -> Payments
   -- | Returns the dates at which cashflow is exchanged
   paymentDates :: b -> [Date]
-  duration     :: b -> Double
+  -- | Macaulay duration
+  duration     :: b -> TermStructure -> Date -> Double
+  duration bond ts now =
+    let
+      weighted_sum = amount $ sum $ zipWith3 macaulay dfs cs [1::Double ..]
+    in
+      inv_pv * weighted_sum
+    where (ds,cs) = unzip $ cashflow bond
+          dfs = dfsAt ts $ map (price_sanity . diffDayCount bond now) ds
+          inv_pv = recip . amount $ dirty bond ts now
+          macaulay df cs t = scale t $ discount df cs
   convexity    :: b -> Payment
   diffDayCount :: b -> Date -> Date -> Double
   clean bond ts now = dirty bond ts now - ai bond now
   -- If we cannot discount a given cashflow
   -- it has no theoretical value
+    
+  -- Add Either to signify whether or not we
+  -- successfully discounted all cashflows?
   dirty bond ts now = sum $ zipWith discount dfs cs
     where (ds,cs) = unzip $ cashflow bond
-          dfs = dfsAt ts $ map (sanity . diffDayCount bond now) ds
-          discount (Just df) = scale df
-          discount Nothing   = scale 0
-          sanity x
-            | x >= 0    = x
-            | otherwise = error "Cannot price past cashflow!"
+          dfs = dfsAt ts $ map (price_sanity . diffDayCount bond now) ds
+  -- | Yield to maturity
   ytm = undefined
+  -- | Accrued interest
   ai = undefined
 
 -- | Class declaration for amortized bonds
@@ -170,10 +180,10 @@ instance Bond FixedCouponBond where
   convexity = undefined
   duration  = undefined
 
-  ytm z@Zero{..} ts = face ** (negate $ recip t) - 1
-    where zpv  = pv z ts
-          t    = duration z
-          (Cash face _) = fface
+--   ytm z@Zero{..} ts = (face ** (negate $ recip t)) - 1
+--     where zpv  = pv z ts
+--           t    = duration z ts now
+--           (Cash face _) = fface
   ytm _ _ = error "Not implemented (Newton-Raphson method)."
 
 instance Bond FixedAmortizedBond where
@@ -269,5 +279,13 @@ instance Show FixedAmortizedBond where
                      ++ "  Basis:            " ++ show adcc  ++ "\n"
                      ++ "  Roll Convention:  " ++ show aroll
 
+-- Helper functions
 mkPayment :: Rate -> Cash -> Date -> Payment
 mkPayment rate face date = (date, scale rate face)
+
+discount (Just df) = scale df
+discount Nothing   = scale 0
+
+price_sanity x
+  | x >= 0    = x
+  | otherwise = error "Cannot price past cashflow!"

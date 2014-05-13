@@ -103,6 +103,11 @@ sum :: [Cash] -> Cash
 sum (c:[]) = c
 sum (c:cs) = c + sum cs
 
+amount :: Cash -> Double
+amount (Cash a _) = a
+
+currency :: Cash -> Currency
+currency (Cash _ c) = c
 --- Support for currency conversion
 
 data CurrencyPair = CurrencyPair Currency Currency

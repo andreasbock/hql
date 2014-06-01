@@ -137,16 +137,16 @@ data FixedCouponBond where
 -- Instances
 
 instance Instrument FixedCouponBond where
-  type PricingEngine = TermStructure
+  data PricingEngine FixedCouponBond = FCB TermStructure
   pv c@Consol{..} _ = return $ scale frate fface
-  pv bond ts = liftM (dirty bond ts) getDay
+  pv bond (FCB ts) = liftM (dirty bond ts) getDay
   expired Zero{..} = isExpired fmatu
   expired Consol{..} = return False
   expired Bullet{..} = isExpired fmatu
 
 instance Instrument FixedAmortizedBond where
-  type PricingEngine = TermStructure
-  pv bond ts = liftM (dirty bond ts) getDay
+  data PricingEngine FixedAmortizedBond = FAB TermStructure
+  pv bond (FAB ts) = liftM (dirty bond ts) getDay
   expired Serial{..} = isExpired amatu
   expired Annuity{..} = isExpired amatu
 
@@ -178,7 +178,6 @@ instance Bond FixedCouponBond where
   paymentDates Consol{..} = extrapolateDates froll fstms fsett
 
   convexity = undefined
-  duration  = undefined
 
 --   ytm z@Zero{..} ts = (face ** (negate $ recip t)) - 1
 --     where zpv  = pv z ts
@@ -232,7 +231,6 @@ instance Bond FixedAmortizedBond where
 
   paymentDates Serial{..} = interpolateDates amatu aroll astms asett
   paymentDates Annuity{..} = interpolateDates amatu aroll astms asett
-  duration = undefined
   convexity = undefined
 
 instance Amortized FixedAmortizedBond

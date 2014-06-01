@@ -12,6 +12,7 @@ import Utils.DayCount
 import Utils.Graphics.Visualize
 
 import Instruments.Instrument
+import Instruments.Derivatives.Derivatives
 
 import Instruments.Utils.InterestRate
 import Instruments.Utils.TermStructure

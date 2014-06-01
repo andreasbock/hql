@@ -13,6 +13,6 @@ import Utils.Currency
 
 -- | Instrument is a base class for financial instruments
 class Instrument i where
-  type PricingEngine :: *
+  data PricingEngine i :: *
   expired :: i -> IO Bool
-  pv      :: i -> PricingEngine -> IO Cash
+  pv      :: i -> PricingEngine i -> IO Cash

@@ -14,20 +14,13 @@ module Instruments.FixedIncome.Bonds.Bonds where
 import Control.Monad (liftM)
 import qualified Data.List as L
 import Utils.Calendar
+import Utils.Payments
 import Utils.Currency
 import Utils.DayCount
 import Instruments.Instrument
 import Instruments.Utils.TermStructure
 import Instruments.Utils.InterestRate
 import Prelude hiding (sum)
-
---
--- Types
---
-
-type Repayment = Double
-type Payment = (Date, Cash)
-type Payments = [Payment]
 
 --
 -- Classes

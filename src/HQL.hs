@@ -7,12 +7,14 @@
 module HQL where
 -- import Utils.Brownian
 import Utils.Calendar
+import Utils.Payments
 import Utils.Currency
 import Utils.DayCount
 import Utils.Graphics.Visualize
 
 import Instruments.Instrument
 import Instruments.Derivatives.Derivatives
+import Instruments.Utils.BinomialModel
 
 import Instruments.Utils.InterestRate
 import Instruments.Utils.TermStructure

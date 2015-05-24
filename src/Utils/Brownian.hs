@@ -20,7 +20,7 @@ randomUnit :: Simulation Double
 randomUnit = state $ randomR (0,1)
 
 -- | Converts a uniform distributin sample into a
--- normal gaussian distributed sample.
+-- normal Gaussian distributed sample.
 boxMuller :: Simulation Double
 boxMuller = do
   u0 <- randomUnit

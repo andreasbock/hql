@@ -5,6 +5,7 @@
 -- Stability:   experimental
 -- Portability: portable
 module HQL where
+
 -- import Utils.Brownian
 import Utils.Calendar
 import Utils.Payments
@@ -19,4 +20,4 @@ import Instruments.Utils.BinomialModel
 import Instruments.Utils.InterestRate
 import Instruments.Utils.TermStructure
 
-import Instruments.FixedIncome.Bonds.Bonds
+import Instruments.FixedIncome.Bonds

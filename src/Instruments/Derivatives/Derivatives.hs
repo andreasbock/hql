@@ -12,7 +12,6 @@ module Instruments.Derivatives.Derivatives where
 
 import Instruments.Instrument
 import Instruments.Utils.BinomialModel
-import Instruments.FixedIncome.Bonds.Bonds
 import Utils.Calendar
 import Utils.Currency
 

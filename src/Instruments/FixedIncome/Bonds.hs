@@ -9,7 +9,8 @@
 --
 -- Types and functions for working with interest rates
 
-module Instruments.FixedIncome.Bonds.Bonds where
+-- module HQL.Instruments.FixedIncome.Bonds where
+module Instruments.FixedIncome.Bonds where
 
 import Control.Monad (liftM)
 import qualified Data.List as L

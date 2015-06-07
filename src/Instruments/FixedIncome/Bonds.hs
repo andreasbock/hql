@@ -271,6 +271,18 @@ instance Show FixedAmortizedBond where
                      ++ "  Basis:            " ++ show adcc  ++ "\n"
                      ++ "  Roll Convention:  " ++ show aroll
 
+
+-- type Guess = Double
+-- type Offset = Double
+-- type PV = Double
+-- type Term = (Offset, Double)
+
+-- Computes the yield 'y' in the follow formula:
+-- c*(1 + y)^-1 + c*(1 + y)^-2 + . . . + c*(1 + y)^-Y + B*(1 + y)^-Y = PV
+-- yieldCashflow :: PV -> [Double] -> [Years] -> Double -> Double
+-- yieldCashflow pv coupons offsets r = (sum $ zipWith f coupons offsets) - pv
+--   where f c o = c * (1 + r)**o
+
 -- Helper functions
 mkPayment :: Rate -> Cash -> Date -> Payment
 mkPayment rate face date = (date, scale rate face)

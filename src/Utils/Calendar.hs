@@ -81,6 +81,9 @@ getYearOffset now date
   where (y,_,_) = WeekDate.toWeekDate date
         diff = fromIntegral $ Cal.diffDays date now
 
+getYearOffsets :: Date -> [Date] -> [Years]
+getYearOffsets now dates = map (getYearOffset now) dates
+
 getDay :: IO Date
 getDay = T.getCurrentTime >>= \d -> return (T.utctDay d)
 

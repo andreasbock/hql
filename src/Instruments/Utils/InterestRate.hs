@@ -52,6 +52,7 @@ convertFreq (Other d)    = fromIntegral d
 newtype ContinuousRate = ContinuousRate Rate deriving (Show)
 newtype SimpleRate     = SimpleRate Rate deriving (Show)
 data ExponentialRate   = ExponentialRate Rate Frequency deriving (Show)
+data BondQuote         = Clean | Dirty deriving (Show)
 
 class InterestRate a where
   -- | Returns the corresponding continuously compounded rate

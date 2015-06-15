@@ -7,11 +7,11 @@
 -- Portability: portable
 --
 -- Types and functions for HQLs Cash type
-
 module Utils.Currency where
 import Prelude hiding (sum)
+
 -- Some common currencies
-data Currency = USD | EUR | GBP | CHF | JPY | DKK | SEK deriving (Show,Eq)
+data Currency = USD | EUR | GBP | CHF | JPY | DKK | SEK | KRW deriving (Show,Eq)
 
 -- redesign, see discounting
 data Cash = Cash Double Currency
@@ -74,30 +74,15 @@ instance Fractional Cash where
 instance Eq Cash where
   (Cash v c) == (Cash v' c') = v == v' && c == c'
 
+instance Ord Cash where
+  (Cash v c) < (Cash v' c')
+    | c /= c'   = error "Currency mismatch!"
+    | otherwise = v < v'
+
 expC, add, scale :: Double -> Cash -> Cash
-expC d (Cash v USD) = Cash (v**d) USD
-expC d (Cash v EUR) = Cash (v**d) EUR
-expC d (Cash v GBP) = Cash (v**d) GBP
-expC d (Cash v JPY) = Cash (v**d) JPY
-expC d (Cash v CHF) = Cash (v**d) CHF
-expC d (Cash v DKK) = Cash (v**d) DKK
-expC d (Cash v SEK) = Cash (v**d) SEK
-
-scale d (Cash v USD) = Cash (d*v) USD
-scale d (Cash v EUR) = Cash (d*v) EUR
-scale d (Cash v GBP) = Cash (d*v) GBP
-scale d (Cash v JPY) = Cash (d*v) JPY
-scale d (Cash v CHF) = Cash (d*v) CHF
-scale d (Cash v DKK) = Cash (d*v) DKK
-scale d (Cash v SEK) = Cash (d*v) SEK
-
-add d (Cash v USD) = Cash (d+v) USD
-add d (Cash v EUR) = Cash (d+v) EUR
-add d (Cash v GBP) = Cash (d+v) GBP
-add d (Cash v JPY) = Cash (d+v) JPY
-add d (Cash v CHF) = Cash (d+v) CHF
-add d (Cash v DKK) = Cash (d+v) DKK
-add d (Cash v SEK) = Cash (d+v) SEK
+expC  d (Cash v c) = Cash (v**d) c
+scale d (Cash v c) = Cash (d*v)  c
+add   d (Cash v c) = Cash (d+v)  c
 
 sum :: [Cash] -> Cash
 sum (c:[]) = c
@@ -108,8 +93,14 @@ amount (Cash a _) = a
 
 currency :: Cash -> Currency
 currency (Cash _ c) = c
---- Support for currency conversion
 
+unCurrency :: Cash -> Double
+unCurrency (Cash v _) = v
+
+unCurrencies :: [Cash] -> [Double]
+unCurrencies = map unCurrency
+
+--- Support for currency conversion
 data CurrencyPair = CurrencyPair Currency Currency
 data ExchangeRate = ExchangeRate Double CurrencyPair
 

@@ -18,10 +18,19 @@ import Utils.Calendar
 import Utils.Payments
 import Utils.Currency
 import Utils.DayCount
+import Utils.RootFinding
 import Instruments.Instrument
 import Instruments.Utils.TermStructure
 import Instruments.Utils.InterestRate
 import Prelude hiding (sum)
+-- import qualified Prelude hiding (sum)
+
+--
+-- Global parameters
+--
+
+yieldTolerance :: Double
+yieldTolerance = 0.000001
 
 --
 -- Classes
@@ -31,7 +40,7 @@ import Prelude hiding (sum)
 class Instrument b => Bond b where
   clean, dirty :: b -> TermStructure -> Date -> Cash
   -- | Yield to maturity
-  ytm          :: b -> TermStructure -> Double
+  ytm          :: b -> BondQuote -> TermStructure -> Date -> Double
   -- | Accrued interest
   ai           :: b -> Date -> Cash
   -- | Principal (or face value) of a bond
@@ -68,7 +77,21 @@ class Instrument b => Bond b where
     where (ds,cs) = unzip $ cashflow bond
           dfs = dfsAt ts $ map (price_sanity . diffDayCount bond now) ds
   -- | Yield to maturity
-  ytm = undefined
+  ytm _    Clean _  _   = undefined -- needs `ai`
+  ytm bond Dirty ts now = 0.0 -- bisection yieldTolerance yieldCashflow a b
+    where (Cash pv currency) = dirty bond ts now
+          (ds,cs) = unzip $ cashflow bond
+          ds' = getYearOffsets now ds :: [Double]
+          cs' = unCurrencies cs       :: [Double]
+          -- function that should equal zero when `r` is the yield
+          yieldCashflow :: Double -> Double
+          yieldCashflow r = (L.sum $ zipWith (f r) cs' ds') - pv
+          -- helper to compute the discounted cash flows using the yield `r`
+          f :: Double -> Double -> Double -> Double
+          f r c o = c*((1 + r)**o)
+          -- interval [a,b] for bisection method, ±100% yields
+          a = -1
+          b =  1
   -- | Accrued interest
   ai = undefined
 
@@ -177,7 +200,7 @@ instance Bond FixedCouponBond where
 --     where zpv  = pv z ts
 --           t    = duration z ts now
 --           (Cash face _) = fface
-  ytm _ _ = error "Not implemented (Newton-Raphson method)."
+--   ytm _ _ = error "Not implemented (Newton-Raphson method)."
 
 instance Bond FixedAmortizedBond where
   diffDayCount Annuity{..} = modifier adcc
@@ -274,7 +297,7 @@ instance Show FixedAmortizedBond where
 
 -- Computes the yield 'y' in the follow formula:
 -- c*(1 + y)^-1 + c*(1 + y)^-2 + . . . + c*(1 + y)^-Y + B*(1 + y)^-Y = PV
--- yieldCashflow :: PV -> [Double] -> [Years] -> Double -> Double
+-- yieldCashflow :: Double -> [Double] -> [Double] -> Double -> Double
 -- yieldCashflow pv coupons offsets r = (sum $ zipWith f coupons offsets) - pv
 --   where f c o = c * (1 + r)**o
 -- myCF = [5,5,5,5,5,105] :: [Double]
@@ -283,7 +306,7 @@ instance Show FixedAmortizedBond where
 -- start = -1
 -- stop  =  1
 -- h = yieldCashflow myPV myCF myOffsets
--- r = bisection epsilon h start stop
+-- r = bisection yieldTolerance h start stop
 
 -- Helper functions
 mkPayment :: Rate -> Cash -> Date -> Payment
